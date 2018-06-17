@@ -46,4 +46,3 @@ if __name__ == '__main__':
 
     else:
         print("Please provide arguments")
-    # getAllStores(arguments[1])

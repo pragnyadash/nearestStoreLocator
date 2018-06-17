@@ -4,6 +4,13 @@ from geo import getOrigin
 
 
 def getNearestStores(addr, unit=None, output=None):
+    """
+
+    :param addr: address of the origin to which nearest store needs to be found
+    :param unit: optional argument for distance unit
+    :param output: optional argument for format of output
+    :return: formatted address of the nearest store
+    """
     closest = None
     store = None
     origin = getOrigin(addr)
@@ -79,7 +86,14 @@ def distance(start, end, unit=None):
 
 
 def formatAddr(address, distance, unit, output):
-    d = ""
+    """
+
+    :param address: json formatted row from csv file
+    :param distance: distance from origin in mi/km
+    :param unit: unit expected by user
+    :param output: output format expected by user
+    :return: formatted address of the store location
+    """
     addr = ""
     if unit:
         d = str(distance) + " " + unit
