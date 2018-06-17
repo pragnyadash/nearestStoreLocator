@@ -37,12 +37,11 @@ if __name__ == '__main__':
                 output = None
         else:
             output = None
-        if "--address" in arguments:
+        if "--address" in arguments and arguments["--address"] is not None:
             address = arguments["--address"]
-            print(getNearestStores(address, units, output))
-        if "--zip" in arguments:
-            zip = arguments["--zip"]
-            print(getNearestStores(zip, units, output))
+        elif "--zip" in arguments and arguments["--zip"] is not None:
+            address = arguments["--zip"]
+        print(getNearestStores(address, units, output))
 
     else:
         print("Please provide arguments")

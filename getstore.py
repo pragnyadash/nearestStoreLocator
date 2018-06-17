@@ -33,13 +33,15 @@ def getNearestStores(addr, unit=None, output=None):
             if row['Latitude'] not in [None, '', 'None'] and row['Longitude'] not in [None, '', 'None']:
                 destination = (float(row['Latitude']), float(row['Longitude']))
                 dist = distance((float(originLat), float(originLng)), destination, unit)
+                if "error" in dist:
+                    return dist
                 if closest is None:
                     closest = round(dist, 2)
                     store = row
                 elif closest > dist:
                     closest = round(dist, 2)
                     store = row
-
+    csvfile.close()
     return formatAddr(store, closest, unit, output)
 
 
@@ -68,8 +70,16 @@ def distance(start, end, unit=None):
     :param end: tuple of latitude longitude ending position
     :return:
     """
-    latS, lonS = start
-    latE, lonE = end
+    if type(start) == tuple and type(end) == tuple:
+        latS, lonS = start
+        latE, lonE = end
+        if type(latS) != float or type(lonS) != float or type(latE) != float or type(lonE) != float:
+            return {"error": "INCORRECT_LATLNG_TYPE",
+                    "error_message": "Cannot find distance between two lat lng which are not floating point numbers"}
+    else:
+        return {"error": "INCORRECT_DESTORG_INPUT",
+                "error_message": "Need a tuple of lat lng for origin and destination addresses."}
+
     rad = 3959
     if unit:
         if unit == "km":
@@ -95,15 +105,31 @@ def formatAddr(address, distance, unit, output):
     :return: formatted address of the store location
     """
     addr = ""
-    if unit:
+    if unit and unit in ["km", "mi"]:
         d = str(distance) + " " + unit
     else:
         d = str(distance) + " " + "mi"
-    if not output or output == "text":
-        addr += address["Store Name"] + '\n' + address["Address"] + ', ' + address["City"] + ', ' + address["County"] + \
-                ', ' + address["Zip Code"] + '\n' + d
-    else:
+    if output and output == "json":
+        if type(address) != dict:
+            return {"error": "INCORRECT_ADDRESS",
+                    "error_message": "Improperly formatted address input. Please provide a json formatted address."}
+
         addr = address
         addr["Distance"] = d
-    return addr
+    else:
+        if type(address) != dict:
+            return {"error": "INCORRECT_ADDRESS",
+                    "error_message": "Improperly formatted address input. Please provide a json formatted address."}
+        if "Store Name" in address:
+            addr += address["Store Name"] + '\n'
+        if "Address" in address:
+            addr += address["Address"] + ', '
+        if "City" in address:
+            addr += address["City"] + ', '
+        if "County" in address:
+            addr += address["County"] + ', '
+        if "Zip Code" in address:
+            addr += address["Zip Code"]
+        addr += '\n' + d
 
+    return addr
